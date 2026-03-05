@@ -14,6 +14,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import { registerUser } from "@/server-actions/users";
+import { useRouter } from "next/navigation";
 
 
 const formSchema = z.object({
@@ -29,6 +32,10 @@ const formSchema = z.object({
 });
 
 function RegisterPage() {
+  
+  const [loading, setLoading] = React.useState(false);
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,9 +45,22 @@ function RegisterPage() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    console.log(data);
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+     try {
+       setLoading(true);
+        const response = await registerUser(data);
+
+        if (response.success) {
+          toast.success(response.message);
+          router.push("/login");
+        } else {
+          toast.error(response.message);
+        }
+     } catch (error ) {
+      toast.error("Registration failed: " + (error as Error).message);
+     } finally {
+      setLoading(false);
+     }
   }
 
   return (
@@ -96,7 +116,8 @@ function RegisterPage() {
             <Link href="/login" className="text-smunderline">
               Already have an account? Login
             </Link> 
-            <Button type="submit" >
+            <Button type="submit"
+              disabled={loading}>
               Register
             </Button>
            </div> 
