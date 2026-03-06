@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import CustomLayout from "@/custom-layout";
 
 
 
@@ -26,8 +27,8 @@ export default function RootLayout({
       <body
         className={`${montserratFont.variable} ${montserratFont.className} antialiased`}
       >
-        {children}
-        <Toaster/>
+        <CustomLayout>{children}</CustomLayout>
+        <Toaster />
       </body>
     </html>
   );

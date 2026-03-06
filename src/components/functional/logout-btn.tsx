@@ -30,7 +30,9 @@ function LogoutButton() {
 
   return (
     <div>
-      <Button className="w-max" onClick={handleLogout}
+      <Button
+       className="w-full"
+       onClick={handleLogout}
       disabled={loading}>
         Logout
       </Button>
