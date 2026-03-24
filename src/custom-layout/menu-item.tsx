@@ -39,8 +39,8 @@ function MenuItems({ openMenuItems, setOpenMenuItems }: IMenuItems) {
     },
 
     {
-      name: "My Blogs",
-      path: "/user/my-blogs",
+      name: "All Blogs",
+      path: "/user/all-blogs",
       icon: <ListCheck size={14} />,
     },
     {

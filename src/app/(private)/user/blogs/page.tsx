@@ -6,7 +6,7 @@ import React from 'react'
 function AllBlogsPage() {
   return (
     <div className='flex justify-between items-center'>
-      <PageTitle title="All Blogs" />
+      <PageTitle title="My Blogs" />
       <Button>
         <Link href="/user/blogs/add">Create New Blog</Link>
       </Button>

@@ -6,7 +6,7 @@ function AddBlogPage() {
   return (
     <div>
         <PageTitle title='Add New Blog' />
-        <BlogForm />
+        <BlogForm formType="add" />
     </div>
   )
 }

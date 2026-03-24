@@ -6,7 +6,7 @@ function EditBlogPage() {
   return (
     <div>
         <PageTitle title='Edit Blog' />
-        <BlogForm />
+        <BlogForm formType="edit" />
     </div>
   )
 }
