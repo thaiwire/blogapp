@@ -1,0 +1,31 @@
+import useUserStore, { IUserStore } from "@/app/global-store/users-store";
+import { Menu } from "lucide-react";
+import React from "react";
+import MenuItems from "./menu-item";
+
+function PrivateLayoutHeader() {
+  const { user } = useUserStore() as IUserStore;
+  const [openMenuItems, setOpenMenuItems] = React.useState(false);
+
+  return (
+    <div className="bg-primary flex justify-between p-6">
+      <h1 className="text-xl font-bold text-white">NN.R.B</h1>
+      <div className="flex gap-5 items-center">
+        <span className="text-white">{user?.name}</span>
+        <Menu
+          className="text-white cursor-pointer"
+          size={14}
+          onClick={() => setOpenMenuItems(true)}
+        />
+      </div>
+      {openMenuItems && (
+        <MenuItems
+          openMenuItems={openMenuItems}
+          setOpenMenuItems={setOpenMenuItems}
+        />
+      )}
+    </div>
+  );
+}
+
+export default PrivateLayoutHeader;
