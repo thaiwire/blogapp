@@ -1,9 +1,11 @@
 "use client";
 
+import useUserStore, { IUserStore } from "@/app/global-store/users-store";
 import PageTitle from "@/components/functional/page-title";
 import Spinner from "@/components/ui/spinner";
-import { IBlog } from "@/interfaces";
+import { IBlog, ILike } from "@/interfaces";
 import { getBlogById } from "@/server-actions/blogs";
+import { getLikesOfBlog, likeBlog, unlikeBlog } from "@/server-actions/likes";
 import dayjs from "dayjs";
 import { HeartIcon, MessageCircle } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -14,6 +16,8 @@ function BlogInfoPage() {
   const params = useParams();
   const [loading, setLoading] = React.useState(true);
   const [blog, setBlog] = React.useState<IBlog | null>(null);
+  const [likes, setLikes] = React.useState<ILike[]>([]);
+  const { user } = useUserStore() as IUserStore;
 
   const fetchBlog = async () => {
     setLoading(true);
@@ -21,11 +25,60 @@ function BlogInfoPage() {
       if (params.id) {
         const response = await getBlogById(params.id as string);
         setBlog(response.data);
+        const likesResponse = await getLikesOfBlog(params.id as string);
+        if (likesResponse.success) {
+          setLikes(likesResponse.data || []);
+        } else {
+          toast.error("Failed to fetch likes data");
+        }
       }
     } catch (error) {
       toast.error("Failed to fetch blog data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const likeUnlikeHandler = async () => {
+    // Implement like/unlike functionality here
+    try {
+      const isLiked = likes.some((like) => like.user_id === user?.id);
+      let response = null;
+      if (isLiked) {
+        response = await unlikeBlog(
+          blog?.id as string,
+          user?.id as string,
+          likes?.length - 1,
+        );
+      } else {
+        response = await likeBlog(
+          blog?.id as string,
+          user?.id as string,
+          likes?.length + 1,
+        );
+      }
+      if (!response.success) {
+        toast.error(response.error || "Failed to update like/unlike status");
+        return;
+      }
+
+      setLikes((prevLikes: any) => {
+        if (isLiked) {
+          return prevLikes.filter((like: ILike) => like.user_id !== user?.id);
+        } else {
+          return [
+            ...prevLikes,
+            { id :  new Date().getTime(),
+              user_id: user?.id as string,
+              blog_id: blog?.id as string,
+              created_at: new Date().toISOString(),
+              user: user ,
+             },
+          ];
+        }
+      });
+    } catch (error) {
+      toast.error("Failed to update like/unlike status");
     }
   };
 
@@ -76,15 +129,18 @@ function BlogInfoPage() {
       </div>
       <div className="flex gap-10">
         <div className="text-sm text-gray-700">
-          <HeartIcon className=" cursor-pointer" size={18} />
-          {blog?.likes_count || 0} Likes
+          <HeartIcon className=" cursor-pointer" size={18}
+          color={likes.some((like) => like.user_id === user?.id) ? "red" : "grey"} 
+          fill={likes.some((like) => like.user_id === user?.id) ? "red" : "none"}
+          onClick={likeUnlikeHandler} 
+         />
+          {likes.length || 0} Likes
         </div>
 
         <div className="text-sm text-gray-700">
           <MessageCircle className=" cursor-pointer" size={18} />
           {blog?.comments_count || 0} Comments
         </div>
-
       </div>
     </div>
   );

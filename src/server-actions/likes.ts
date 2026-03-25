@@ -2,7 +2,7 @@
 
 import supabase from "@/config/supabase-config";
 
-export const likePost = async (
+export const likeBlog = async (
   blogId: string,
   userId: string,
   newLikeCount: number,
@@ -18,7 +18,7 @@ export const likePost = async (
   // increment the like count in the blogs table
   const { error: updateError } = await supabase
     .from("blogs")
-    .update({ like_count: newLikeCount })
+    .update({ likes_count: newLikeCount })
     .eq("id", blogId);
   if (updateError) {
     return { success: false, error: updateError.message };
@@ -26,7 +26,7 @@ export const likePost = async (
   return { success: true, message: "Like added successfully", data };
 };
 
-export const unlikePost = async (
+export const unlikeBlog = async (
   blogId: string,
   userId: string,
   newLikeCount: number,
@@ -44,7 +44,7 @@ export const unlikePost = async (
   // decrement the like count in the blogs table
   const { error: updateError } = await supabase
     .from("blogs")
-    .update({ like_count: newLikeCount })
+    .update({ likes_count: newLikeCount })
     .eq("id", blogId);
   if (updateError) {
     return { success: false, error: updateError.message };
@@ -52,7 +52,13 @@ export const unlikePost = async (
   return { success: true, message: "Like removed successfully", data };
 };
 
-
-
-
-
+export const getLikesOfBlog = async (blogId: string) => {
+  const { data, error } = await supabase
+    .from("likes")
+    .select("*")
+    .eq("blog_id", blogId);
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  return { success: true, data: data  || [] };
+};

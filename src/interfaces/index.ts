@@ -26,3 +26,13 @@ export interface IBlog {
     author?: IUser;
 
 }
+
+export interface ILike {
+    id: string;
+    blog_id: string;
+    user_id: string;
+    created_at: string;
+
+    user?: IUser;
+}
+
