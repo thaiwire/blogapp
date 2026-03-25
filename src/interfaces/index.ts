@@ -16,6 +16,8 @@ export interface IBlog {
 
     title : string;
     description : string;
+    image? : string;
+    category : string;
     content : string;
     author_id : string;
     likes_count : number;

@@ -28,6 +28,9 @@ import { Textarea } from "@/components/ui/textarea";
 import Editor from "react-simple-wysiwyg";
 import { addBlog, updateBlog } from "@/server-actions/blogs";
 import { useRouter } from "next/navigation";
+import { uploadFileAndGetUrl } from "@/helpers";
+import useUserStore, { IUserStore } from "@/app/global-store/users-store";
+import { IBlog } from "@/interfaces";
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters."),
@@ -36,30 +39,64 @@ const formSchema = z.object({
   content: z.string().min(1, "Content must be at least 1 character."),
 });
 
-function BlogForm({ formType }: { formType: "add" | "edit" }) {
-  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
-  const [content, setContent] = React.useState("");
+function BlogForm({
+  formType,
+  blog,
+}: {
+  formType: "add" | "edit";
+  blog?: Partial<IBlog>;
+}) {
+  const [selectedFile, setSelectedFile] = React.useState<File | null | string>(
+    blog?.image || null,
+  );
+  const [content, setContent] = React.useState(blog?.content || "");
   const [loading, setLoading] = React.useState(false);
+  const { user } = useUserStore() as IUserStore;
+
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
-      title: "",
-      description: "",
-      category: "",
-      content: "",
+      title: blog?.title || "",
+      description: blog?.description || "",
+      category: blog?.category || "",
+      content: blog?.content || "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true);
-
       let response;
+
+      let imageUrl = blog?.image || "";
+      if (selectedFile && typeof selectedFile === "object") {
+        const response: any = await uploadFileAndGetUrl(selectedFile);
+        if (response?.success) {
+          imageUrl = response.data;
+        } else {
+          toast.error(
+            response?.message || "An error occurred while uploading the file.",
+          );
+        }
+      }
+
       if (formType === "add") {
-        response = await addBlog({ ...values, content: content });
+        response = await addBlog({
+          ...values,
+          content: content,
+          image: imageUrl,
+          author_id: user?.id,
+          is_active: true,
+        });
+      } else {
+        response = await updateBlog(blog?.id || "", {
+          ...values,
+          content: content,
+          image: imageUrl,
+        });
       }
       if (response?.success) {
         toast.success(response?.message || "Blog added successfully.");
@@ -160,7 +197,11 @@ function BlogForm({ formType }: { formType: "add" | "edit" }) {
           />
           {selectedFile && (
             <img
-              src={URL.createObjectURL(selectedFile)}
+              src={
+                typeof selectedFile === "string"
+                  ? selectedFile
+                  : URL.createObjectURL(selectedFile)
+              }
               alt="Selected"
               className="mt-2 w-20 h-20 object-cover rounded-md border border-gray-300"
             />

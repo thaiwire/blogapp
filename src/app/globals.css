@@ -142,3 +142,7 @@
 .select button {
   width :100% !important
 }
+
+table {
+  border:1px solid #ccc !important;
+}

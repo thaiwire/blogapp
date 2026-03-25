@@ -1,14 +1,29 @@
-import PageTitle from '@/components/functional/page-title'
-import React from 'react'
-import BlogForm from '../../_common/blog-form'
+import PageTitle from "@/components/functional/page-title";
+import React from "react";
+import BlogForm from "../../_common/blog-form";
+import { getBlogById } from "@/server-actions/blogs";
 
-function EditBlogPage() {
-  return (
-    <div>
-        <PageTitle title='Edit Blog' />
-        <BlogForm formType="edit" />
-    </div>
-  )
+interface EditBlogPageProps {
+  params: Promise<{
+    id: string;
+  }>;
 }
 
-export default EditBlogPage
+async function EditBlogPage({ params }: EditBlogPageProps) {
+  const { id } = await params;
+  const blogResponse = await getBlogById(id);
+  if (!blogResponse.success) {
+    return <div>Blog not found</div>;
+  }
+
+  const blog = blogResponse.data;
+
+  return (
+    <div>
+      <PageTitle title="Edit Blog" />
+      <BlogForm formType="edit" blog={blog} />
+    </div>
+  );
+}
+
+export default EditBlogPage;

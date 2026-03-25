@@ -83,7 +83,7 @@ export const getBlogByAuthor = async(authorId: string) => {
 export const getBlogById = async(id: string) => {
     const { data, error } = await supabase
     .from("blogs")
-    .select("*")
+    .select("*, author:user_profiles(*)")
     .eq("id", id);
     
 
@@ -105,7 +105,7 @@ export const getBlogById = async(id: string) => {
 export const getAllBlogs = async() => {
     const { data, error } = await supabase
     .from("blogs")
-    .select("*")
+    .select("*, author:user_profiles(*)")
     .eq("is_active", true)
     .order("created_at", { ascending: false });
 
