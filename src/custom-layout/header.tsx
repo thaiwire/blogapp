@@ -10,14 +10,18 @@ function PrivateLayoutHeader() {
 
   useEffect(() => {
     if (user) {
-      socket.emit("hi", {
+      socket.emit("client-connect", {
         userId: user.id,
         name: user.name,
       });
      
-      // socket.on("server-message", data=>{
+      // socket.on("server-message", (data) => {
       //   console.log("Server message received:", data);
       // });
+
+      socket.on("message-from-server", (data: any) => {
+        console.log("message-from-server:", data);
+      });
 
     }
   }, [user]);
