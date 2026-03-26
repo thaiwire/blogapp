@@ -2,6 +2,7 @@
 
 import useUserStore, { IUserStore } from "@/app/global-store/users-store";
 import PageTitle from "@/components/functional/page-title";
+import { Button } from "@/components/ui/button";
 import Spinner from "@/components/ui/spinner";
 import { IBlog, ILike } from "@/interfaces";
 import { getBlogById } from "@/server-actions/blogs";
@@ -11,12 +12,14 @@ import { HeartIcon, MessageCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 import React from "react";
 import toast from "react-hot-toast";
+import CommentForm from "../_component/comment-form";
 
 function BlogInfoPage() {
   const params = useParams();
   const [loading, setLoading] = React.useState(true);
   const [blog, setBlog] = React.useState<IBlog | null>(null);
   const [likes, setLikes] = React.useState<ILike[]>([]);
+  const [openCommentForm, setOpenCommentForm] = React.useState(false);
   const { user } = useUserStore() as IUserStore;
 
   const fetchBlog = async () => {
@@ -37,6 +40,14 @@ function BlogInfoPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const reloadComments = async () => {
+    const updateBlog: any = {
+      ...blog,
+      comments_count: (blog?.comments_count || 0) + 1,
+    };
+    setBlog(updateBlog);
   };
 
   const likeUnlikeHandler = async () => {
@@ -68,12 +79,13 @@ function BlogInfoPage() {
         } else {
           return [
             ...prevLikes,
-            { id :  new Date().getTime(),
+            {
+              id: new Date().getTime(),
               user_id: user?.id as string,
               blog_id: blog?.id as string,
               created_at: new Date().toISOString(),
-              user: user ,
-             },
+              user: user,
+            },
           ];
         }
       });
@@ -127,21 +139,43 @@ function BlogInfoPage() {
           </p>
         ))}
       </div>
-      <div className="flex gap-10">
-        <div className="text-sm text-gray-700">
-          <HeartIcon className=" cursor-pointer" size={18}
-          color={likes.some((like) => like.user_id === user?.id) ? "red" : "grey"} 
-          fill={likes.some((like) => like.user_id === user?.id) ? "red" : "none"}
-          onClick={likeUnlikeHandler} 
-         />
-          {likes.length || 0} Likes
-        </div>
+      <div className="flex justify-between item-center w-full">
+        <div className="flex gap-10">
+          <div className="text-sm text-gray-700">
+            <HeartIcon
+              className=" cursor-pointer"
+              size={18}
+              color={
+                likes.some((like) => like.user_id === user?.id) ? "red" : "grey"
+              }
+              fill={
+                likes.some((like) => like.user_id === user?.id) ? "red" : "none"
+              }
+              onClick={likeUnlikeHandler}
+            />
+            <h1 className="text-sm text-gray-700 underline">
+              {likes.length || 0} Likes
+            </h1>
+          </div>
 
-        <div className="text-sm text-gray-700">
-          <MessageCircle className=" cursor-pointer" size={18} />
-          {blog?.comments_count || 0} Comments
+          <div className="text-sm text-gray-700">
+            <MessageCircle className=" cursor-pointer" size={18} />
+            <h1 className="text-sm text-gray-700 underline">
+              {blog?.comments_count || 0} Comments
+            </h1>
+          </div>
         </div>
+        <Button onClick={() => setOpenCommentForm(true)}>Add Comment</Button>
       </div>
+
+      {openCommentForm && (
+        <CommentForm
+          openCommentForm={openCommentForm}
+          setOpenCommentForm={setOpenCommentForm}
+          reloadComments={reloadComments}
+          blog={blog as IBlog}
+        />
+      )}
     </div>
   );
 }

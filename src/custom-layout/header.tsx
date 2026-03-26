@@ -1,11 +1,26 @@
 import useUserStore, { IUserStore } from "@/app/global-store/users-store";
 import { Menu } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import MenuItems from "./menu-item";
+import socket from "@/config/socket-config";
 
 function PrivateLayoutHeader() {
   const { user } = useUserStore() as IUserStore;
   const [openMenuItems, setOpenMenuItems] = React.useState(false);
+
+  useEffect(() => {
+    if (user) {
+      socket.emit("hi", {
+        userId: user.id,
+        name: user.name,
+      });
+     
+      // socket.on("server-message", data=>{
+      //   console.log("Server message received:", data);
+      // });
+
+    }
+  }, [user]);
 
   return (
     <div className="bg-primary flex justify-between p-6">

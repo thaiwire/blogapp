@@ -37,6 +37,7 @@ export const createComment = async ({
   }
 
   return {
+    success: true,
     comment: data,
     message : "Comment created successfully",
   };
