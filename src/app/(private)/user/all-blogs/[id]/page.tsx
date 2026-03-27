@@ -13,6 +13,11 @@ import { useParams } from "next/navigation";
 import React from "react";
 import toast from "react-hot-toast";
 import CommentForm from "../_component/comment-form";
+import { addNotification } from "@/server-actions/notifications";
+import socket from "@/config/socket-config";
+
+
+
 
 function BlogInfoPage() {
   const params = useParams();
@@ -67,6 +72,22 @@ function BlogInfoPage() {
           user?.id as string,
           likes?.length + 1,
         );
+        
+        const notificationPayload = {
+          user_id: blog?.author?.id as string,
+          blog_id: blog?.id,
+          type: "like",
+          content: `${user?.name} liked your blog "${blog?.title}"`,
+          is_read: false,
+        };
+
+        addNotification(notificationPayload);
+
+        socket.emit("send-notification", { 
+          userId: blog?.author?.id,
+          notification: notificationPayload,
+         });
+
       }
       if (!response.success) {
         toast.error(response.error || "Failed to update like/unlike status");
